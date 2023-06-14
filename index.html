@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vườn thông minh</title>
+    <style>
+        /* CSS for the switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin-right: 130px;
+            margin-top: 20px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 34px;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: #fff;
+            border-radius: 50%;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+        
+        input:checked + .slider {
+            background-color: dodgerblue;
+        }
+        
+        input:focus + .slider {
+            box-shadow: 0 0 1px dodgerblue;
+        }
+        
+        input:checked + .slider:before {
+            -webkit-transform: translateX(26px);
+            -ms-transform: translateX(26px);
+            transform: translateX(26px);
+        }
+
+        #pump-status {
+            margin-left: 80px;
+            width: 200px;
+        }
+        
+        /* Rest of the CSS */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #F9F9F9;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        h1 {
+            color: dodgerblue;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 45px;
+        }
+        
+        .sensors-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        
+        .sensor {
+            width: 270px;
+            padding: 20px;
+            border-radius: 5px;
+            background-color: dodgerblue;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease-in-out;
+            margin-bottom: 20px;
+        }
+        
+        .sensor:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sensor h2 {
+            font-size: 20px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .sensor p {
+            font-size: 35px;
+            color: #fff;
+            margin: 0;
+        }
+        
+        #pump-control {
+            display: flex;
+            align-items: center;
+            margin-top: 60px;
+            justify-content: center;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        
+        #pump-control label {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        #pump-control select {
+            font-size: 22px;
+            padding: 7px;
+            color: #333;
+        }
+        
+        #pump-time-control {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        #pump-time-control label {
+            font-size: 20px;
+            color: #333;
+            margin-right: 10px;
+        }
+        
+        #pump-time-control input[type="time"] {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        #set-pump-time {
+            background-color: dodgerblue;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s ease-in-out;
+        }
+        
+        #set-pump-time:hover {
+            background-color: #187BCD;
+        }
+
+
+        #connection-status {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .connected {
+            color: green;
+        }
+
+        .disconnected {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vườn thông minh</h1>
+    
+    <div class="sensors-container">
+        <div class="sensor" id="temperature-sensor">
+            <h2>Cảm biến nhiệt độ</h2>
+            <p id="temperature-value">0°C</p>
+        </div>
+        
+        <div class="sensor" id="humidity-sensor">
+            <h2>Cảm biến độ ẩm không khí</h2>
+            <p id="humidity-value">0%</p>
+        </div>
+        
+        <div class="sensor" id="soil-moisture-sensor">
+            <h2>Cảm biến độ ẩm đất</h2>
+            <p id="soil-moisture-value">0%</p>
+        </div>
+        
+        <div class="sensor" id="light-sensor">
+            <h2>Cảm biến ánh sáng</h2>
+            <p id="light-value">0 lux</p>
+        </div>
+    </div>
+    
+    <b><div id="connection-status" class="disconnected">Trạng thái kết nối: Mất kết nối</div></b>
+    
+    <div id="pump-control">
+        <label for="pump-mode">Chế độ điều khiển</label>
+        <select id="pump-mode">
+            <option value="manual">Thủ công</option>
+            <option value="semi-auto">Bán tự động</option>
+            <option value="auto">Tự động</option>
+        </select>
+        <div id="switch-container">
+            <label class="switch">
+                <div id="pump-status">Trạng thái bơm: Tắt</div>
+                <input type="checkbox" id="pump-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+    
+    <div id="pump-time-control">
+        <label for="pump-time">Thời gian bơm:</label>
+        <input type="time" id="pump-time">
+        <button id="set-pump-time">Cài đặt</button>
+    </div>
+
+    <script>
+        // Simulated sensor data
+        setInterval(function() {
+            document.getElementById('temperature-value').innerHTML = Math.floor(Math.random() * 30) + 20 + '°C';
+            document.getElementById('humidity-value').innerHTML = Math.floor(Math.random() * 70) + 30 + '%';
+            document.getElementById('soil-moisture-value').innerHTML = Math.floor(Math.random() * 60) + 40 + '%';
+            document.getElementById('light-value').innerHTML = Math.floor(Math.random() * 5000) + 1000 + ' lux';
+        }, 2000);
+
+        // Pump control
+        var pumpModeSelect = document.getElementById('pump-mode');
+        var pumpSwitchContainer = document.getElementById('switch-container');
+        var pumpSwitch = document.getElementById('pump-switch');
+        var pumpTimeControl = document.getElementById('pump-time-control');
+
+        pumpModeSelect.addEventListener('change', function() {
+            var selectedMode = pumpModeSelect.value;
+
+            if (selectedMode === 'manual') {
+                pumpSwitchContainer.style.display = 'flex';
+                pumpTimeControl.style.display = 'none';
+                console.log('Pump mode: Manual');
+            } else if (selectedMode === 'semi-auto') {
+                pumpSwitchContainer.style.display = 'none';
+                pumpTimeControl.style.display = 'flex';
+                console.log('Pump mode: Semi-automatic');
+            } else if (selectedMode === 'auto') {
+                pumpSwitchContainer.style.display = 'none';
+                pumpTimeControl.style.display = 'none';
+                console.log('Pump mode: Automatic');
+            }
+        });
+        
+        var pumpStatus = document.getElementById('pump-status');
+        // Event listener for pump switch change
+        pumpSwitch.addEventListener('change', function() {
+            if (pumpSwitch.checked) {
+                pumpStatus.innerHTML = 'Trạng thái bơm: Bật'; // Update pump status display
+            } else {
+                pumpStatus.innerHTML = 'Trạng thái bơm: Tắt'; // Update pump status display
+            }
+        });
+
+        var setPumpTimeButton = document.getElementById('set-pump-time');
+        setPumpTimeButton.addEventListener('click', function() {
+            var pumpTime = document.getElementById('pump-time').value;
+            console.log('Pump time set to:', pumpTime);
+        });
+
+
+        // connect 
+        setInterval(function() {
+            var connectionStatus = document.getElementById('connection-status');
+            var isDisconnected = Math.random() < 0.2; // Simulate 20% chance of being disconnected
+
+            if (isDisconnected) {
+                connectionStatus.textContent = 'Trạng thái kết nối: Mất kết nối';
+                connectionStatus.classList.add('disconnected');
+                connectionStatus.classList.remove('connected');
+            } else {
+                connectionStatus.textContent = 'Trạng thái kết nối: Đã kết nối';
+                connectionStatus.classList.add('connected');
+                connectionStatus.classList.remove('disconnected');
+            }
+        }, 5000); // Update connection status every 5 seconds
+    </script>
+</body>
+</html>
